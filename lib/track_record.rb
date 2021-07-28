@@ -1,19 +1,20 @@
-require 'activesupport'
+require 'active_support/concern'
 require 'elasticsearch/model'
+require 'track_record/tracker'
 
 module TrackRecord
   extend ActiveSupport::Concern
 
-  QUERY_AMOUNT = ENV["FEED_EVENTS_QUERY_AMOUNT"].to_i || 100
+  QUERY_AMOUNT = ENV["FEED_EVENTS_QUERY_AMOUNT"].nil? ? 100 : ENV["FEED_EVENTS_QUERY_AMOUNT"].to_i
   Client = Elasticsearch::Model.client
 
   included do
     after_commit on: :create do
-      track_change(:index, self.class.to_s, id, previous_changes, current_user, "create")
+      Tracker.track_change(:index, self.class.to_s, id, previous_changes, current_user, "create")
     end
 
     after_commit on: :update do
-      track_change(:index, self.class.to_s, id, previous_changes, current_user, "update")
+      Tracker.track_change(:index, self.class.to_s, id, previous_changes, current_user, "update")
     end
 
     around_destroy :audit_deleted
@@ -24,7 +25,7 @@ module TrackRecord
     index_name = self.audit_index_name
     record_id = self.id
     yield
-    track_deletion(self.class.to_s, record_id, current_user, "delete", record, index_name)
+    Tracker.track_deletion(self.class.to_s, record_id, current_user, "delete", record, index_name)
   end
 
   def audit_index_name
@@ -83,44 +84,5 @@ module TrackRecord
     search = Client.search index: index_name, ignore: [404], body: { size: QUERY_AMOUNT, query: { bool: { must: [ { match: { "record.record_id": id } }, 
                                                       { match: { "record.record_type": class_name } }]}}}
     search['hits']['hits'].pluck('_source') unless search['hits'].nil?
-  end
-
-  def track_change(operation, class_name, record_id, previous_changes, user, event_action)
-    Rails.logger.debug [operation, "Model: #{class_name}; ID: #{record_id}; Changes: #{previous_changes}; User: #{user}"]
-    return if previous_changes.empty?
-
-    class_const = class_name.constantize
-    record = class_const.find(record_id)
-    body = {}
-    body['event_action'] = event_action
-    body['record'] = record.as_json
-    body['changes'] = previous_changes
-    body['user'] = user unless user.nil?
-
-    if class_name == 'ActionText::RichText'
-      audit_index_name = Rails.env.production? ? "audit_richtext" : "audit_richtext_#{Rails.env}"
-    else
-      audit_index_name = record.audit_index_name
-    end
-
-    Client.index index: audit_index_name, body: body
-  end
-
-  def track_deletion(class_name, record_id, user, event_action, deleted_record, index_name)
-    Rails.logger.debug [event_action, "Model: #{class_name}; ID: #{record_id}; User: #{user}"]
-    
-    body = {}
-    body['event_action'] = event_action
-    body['record'] = JSON.parse(deleted_record)
-    body['changes'] = { "updated_at" => [body['record']['updated_at'], DateTime.now.to_s] }
-    body['user'] = user unless user.nil?
-    
-    if class_name == 'ActionText::RichText'
-      audit_index_name = Rails.env.production? ? "audit_richtext_" : "audit_richtext_#{Rails.env}"
-    else
-      audit_index_name = index_name
-    end
-    
-    Client.index index: audit_index_name, body: body
   end
 end
