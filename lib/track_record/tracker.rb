@@ -1,6 +1,6 @@
 module TrackRecord
   class Tracker
-    def track_change(operation, class_name, record_id, previous_changes, user, event_action)
+    def self.track_change(operation, class_name, record_id, previous_changes, user, event_action)
       Rails.logger.debug [operation, "Model: #{class_name}; ID: #{record_id}; Changes: #{previous_changes}; User: #{user}"]
       return if previous_changes.empty?
   
@@ -21,7 +21,7 @@ module TrackRecord
       TrackRecord::Client.index index: audit_index_name, body: body
     end
   
-    def track_deletion(class_name, record_id, user, event_action, deleted_record, index_name)
+    def self.track_deletion(class_name, record_id, user, event_action, deleted_record, index_name)
       Rails.logger.debug [event_action, "Model: #{class_name}; ID: #{record_id}; User: #{user}"]
       
       body = {}
