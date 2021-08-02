@@ -13,7 +13,7 @@ This gem was created with Ruby 2.7, Rails 6.0.3 and ElasticSearch 7.7. Forwards 
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'track-record', git: 'https://github.com/leap2digital/track-record/', branch: 'main'
+gem 'track-record', git: 'https://github.com/leap2digital/track-record', branch: 'main'
 ```
 
 And then execute:
