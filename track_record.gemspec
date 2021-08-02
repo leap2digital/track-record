@@ -24,5 +24,6 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'sqlite3', '~> 1.4'
 
   spec.add_dependency 'activesupport', '~> 6.0.3'
+  spec.add_dependency 'activerecord', '~> 6.0.3'
   spec.add_dependency 'elasticsearch-model', '~> 7.0'
 end
