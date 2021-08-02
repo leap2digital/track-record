@@ -6,7 +6,7 @@ It is based on ActiveRecord callbacks. As the record is created, updated or dele
 
 ## Requirements
 
-This gem uses Ruby 2.7+, Rails 6.0+ and ElasticSearch 7.7+.
+This gem requires Ruby 2.7+, Rails 6.0+ and ElasticSearch 7.7+.
 
 ## Installation
 
@@ -27,6 +27,18 @@ Or install it yourself as:
 ```bash
 $ gem install track-record
 ```
+
+### Configuring an Elasticsearch client for TrackRecord
+
+You can use the generator below to create an initializer for Elasticsearch client config:
+
+```bash
+rails generate track_record:elasticsearch_config
+```
+
+### Tracking the user who made modifications to your model
+
+To track who made modifications to the model we use a global variable called $custom_current_user. You can set the authenticated user to this variable in your authentication logic and the gem will include its info on the changes track record.
 
 ## Usage
 
