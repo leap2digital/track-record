@@ -13,19 +13,13 @@ This gem was created with Ruby 2.7, Rails 6.0.3 and ElasticSearch 7.7. Forwards 
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'track-record'
+gem 'track-record', git: 'https://github.com/leap2digital/track-record/', branch: 'main'
 ```
 
 And then execute:
 
 ```bash
 $ bundle
-```
-
-Or install it yourself as:
-
-```bash
-$ gem install track-record
 ```
 
 ### Configuring an Elasticsearch client for TrackRecord
@@ -36,14 +30,14 @@ You can use the generator below to create an initializer for ElasticSearch clien
 $ rails generate track_record:elasticsearch_config
 ```
 
-NOTE: You can find an example of a [docker-compose.yml](https://github.com/leap2digital/track-record/blob/main/docker-compose.yml) we use for the gem's development with Ruby and Elasticsearch, this might help you set up a development environment.
+NOTE: You can find an example of a [docker-compose.yml](https://github.com/leap2digital/track-record/blob/main/docker-compose.yml) we use for the gem's development with Ruby and Elasticsearch, this might help you set up a development environment for your app that is compatible with the gem.
 
 ## Usage
 
 To start tracking changes in your Rails models simply require the gem's module and include it in your model.rb:
 
 ```ruby
-require 'track-record'
+require 'track_record'
 
 class YourModel < ApplicationRecord
   include TrackRecord
